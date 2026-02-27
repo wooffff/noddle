@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "noddle",
-  "version": "0.1",
+  "version": "1.0",
   "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html"
