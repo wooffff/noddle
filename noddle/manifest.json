@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "doddle",
+  "version": "0.1",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.toddleapp.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

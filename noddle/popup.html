@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 250px;
+      padding: 6px;
+      font-family: sans-serif;
+      font-size: 13px;
+    }
+    .option-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      cursor: help;
+    }
+    input[type="checkbox"] {
+      margin: 0;
+      cursor: pointer;
+    }
+    label {
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="option-row" title="Removes the help button overlay.">
+    <input type="checkbox" id="toggleWalkMe" checked>
+    <label for="toggleWalkMe">Remove ESF Guide Me! button</label>
+  </div>
+
+  <div class="option-row" title="Auto opens documents in new tabs instead of Toddle's custom document app.">
+    <input type="checkbox" id="toggleAutoOpen" checked>
+    <label for="toggleAutoOpen">Auto-open documents in new tabs</label>
+  </div>
+
+  <div class="option-row" title="Search subjects by name (e.g. 'chem') instead of codes.">
+    <input type="checkbox" id="toggleAliases" checked>
+    <label for="toggleAliases">Use subject names in search</label>
+  </div>
+
+  <div class="option-row" title="Automatically redirects you from IGCSE to IB courses.">
+    <input type="checkbox" id="toggleRedirect" checked>
+    <label for="toggleRedirect">Auto-Redirect to IB</label>
+  </div>
+
+  <p>Please reload your page after making changes.</p>
+
+  <script src="popup.js"></script>
+</body>
+</html>
