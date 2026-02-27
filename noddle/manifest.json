@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "doddle",
+  "name": "noddle",
   "version": "0.1",
   "permissions": ["storage"],
   "action": {
