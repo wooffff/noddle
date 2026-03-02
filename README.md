@@ -8,8 +8,8 @@ A browser extension designed to modify the Toddle web interface for better usabi
 * **Auto-Redirect:** Automatically redirects from the IGCSE course overview to the IB course overview.
 * **Cleaner UI:** * Removes the "ESF Guide Me!" (WalkMe) overlay button.
     * Option to hide the "No due date" tab in the consolidated deadlines widget.
-    * Replaces the default Toddle sidebar icon with a custom image.
-* **Workflow Optimization:** Automatically opens documents in a new tab, bypassing the built-in Toddle viewer.
+* **Google Classroom Parity:** Automatically opens documents in a new tab, bypassing the built-in Toddle viewer.\
+... and more!
 
 ## Installation (Developer Mode)
 
