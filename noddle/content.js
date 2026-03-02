@@ -1,35 +1,41 @@
-let isProcessing = false;
-
+// 1. Update your aliases to use arrays
 const subjectAliases = {
-    'chemistry': 'CH',
-    'math': 'MA',
-    'computer science': 'CP',
-    'psychology': 'PS',
-    'english': 'EU',
-    'tok': 'TK',
-    'chinese': 'CY',
-    'nansen': 'N',
+    'chemistry': ['CH'],
+    'math': ['MA', 'MI'],
+    'computer science': ['CP'],
+    'psychology': ['PS'],
+    'philosophy': ['PP'],
+    'english': ['EU'],
+    'tok': ['TK'],
+    'chinese': ['CY'],
+    'french': ['FR'],
+    'japanese': ['JA'],
+    'history': ['HI'],
+    'biology': ['BI'],
+    'physics': ['PH'],
+    'spanish': ['SA'],
+    'economics': ['EC'],
+    'dt': ['TE'],
+    // buisness
+    // ess
+    // sports science
+    // geography
+    // visual art
+    // theatre
+    // music
+    // global politics
+    
+    // Houses
+    'nansen': ['N'],
+    'wilberforce': ['W'],
+    'rutherford': ['R'],
+    'einstein': ['E'],
+    'da vinci': ['D'],
+    'fleming': ['F'],
 };
 
-// css for filter
-const style = document.createElement('style');
-style.innerHTML = `
-    [class*="noResults"], [class*="NoResults"], [class*="EmptyState"] {
-        display: none !important;
-    }
-    .CourseList__courseListContainer___KfY01 {
-        display: block !important;
-        visibility: visible !important;
-        width: 100% !important;
-    }
-    .CourseList__courseItemContainer___k7Ylq {
-        margin-bottom: 0px !important;
-        width: 100% !important;
-    }
-`;
-document.head.appendChild(style);
+// ... [Keep your style injection exactly the same] ...
 
-// toggles elements' display as if they were searched.
 function applyVisualFilter(query) {
     const courses = document.querySelectorAll('.CourseList__courseItemContainer___k7Ylq');
     const searchTerm = query.toLowerCase().trim();
@@ -40,14 +46,19 @@ function applyVisualFilter(query) {
     }
 
     let matchedCodes = [];
-    for (const [fullName, code] of Object.entries(subjectAliases)) {
+    
+    // 2. Adjust the loop to handle the arrays
+    for (const [fullName, codes] of Object.entries(subjectAliases)) {
         if (fullName.startsWith(searchTerm)) {
-            matchedCodes.push(code.toLowerCase());
+            // Push all codes in the array to our matchedCodes list
+            matchedCodes.push(...codes.map(c => c.toLowerCase()));
         }
     }
 
     courses.forEach(card => {
         const title = card.querySelector('.CourseList__courseTitle___acdCw')?.innerText.toLowerCase() || '';
+        
+        // Check if the title includes any of the matched codes OR the literal search term
         const isMatch = matchedCodes.some(code => title.includes(code)) || title.includes(searchTerm);
 
         if (isMatch) {
