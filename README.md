@@ -18,7 +18,7 @@ Since this extension is not on the Chrome Web Store, you must install it manuall
 1. **Download the code:** Click the green **Code** button above and select **Download ZIP**. Extract the folder to a permanent location on your computer.
 2. **Open Extensions page:** In your browser, go to `chrome://extensions`.
 3. **Enable Developer Mode:** Toggle the switch in the top-right corner to **On**.
-4. **Load the extension:** Click **Load unpacked** and select the folder you just extracted (the one containing `manifest.json`).
+4. **Load the extension:** Click **Load unpacked** and select the folder you just extracted (the one containing `manifest.json`, it should be the `noddle` folder).
 5. **Pin it:** Click the puzzle piece icon in your browser toolbar and pin the extension for easy access to settings.
 
 ## Updating
