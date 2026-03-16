@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "noddle",
-  "version": "0.1.5",
+  "version": "0.1.6",
+  "description": "Removes all the uneccessary features from Toddle.",
   "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html"

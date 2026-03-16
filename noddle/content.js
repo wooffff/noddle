@@ -37,13 +37,16 @@ let extensionSettings = {};
 let isProcessing = false;
 
 chrome.storage.sync.get([
-    'walkMeActive', 
+    'hideWalkMeActive', 
+    'hideNoDueActive', 
+    'hideNotifPopupActive',
     'autoOpenActive', 
     'aliasActive', 
     'redirectActive', 
-    'hideNoDueActive', 
     'compactActive', 
-    'prioritizeClassesActive'
+    'prioritizeClassesActive',
+    'preloadActive'
+    
 ], (settings) => {
     extensionSettings = settings;
 
@@ -78,9 +81,10 @@ function applyVisualFilter(query) {
     });
 }
 
-    function cleanPage() {
-        applyCompactMode(extensionSettings.compactActive);
-        applyClassPrioritization(extensionSettings.prioritizeClassesActive);
+function cleanPage() {
+    applyCompactMode(extensionSettings.compactActive);
+    applyClassPrioritization(extensionSettings.prioritizeClassesActive);
+    injectScrollButton();
 
     //redirect user from igcse to ib
     if (extensionSettings.redirectActive !== false) {
@@ -93,7 +97,7 @@ function applyVisualFilter(query) {
     }
 
     // remove esf walk me button
-    if (extensionSettings.walkMeActive !== false) {
+    if (extensionSettings.hideWalkMeActive !== false) {
         const walkMe = document.getElementById('walkme-player');
         if (walkMe) walkMe.remove();
     }
@@ -104,6 +108,14 @@ function applyVisualFilter(query) {
         if (noDueTab) noDueTab.style.setProperty('display', 'none', 'important');
     }
 
+    // remove esf walk me button
+    if (extensionSettings.hideNotifPopupActive !== false) {
+        // Note: The original code used walkMe.remove() here, which might cause an error if walkMe wasn't defined in this scope. 
+        // I fixed it to use notifPopup.remove()
+        const notifPopup = document.querySelector('[id^="walkme-visual-design"]');
+        if (notifPopup) notifPopup.remove(); 
+    }
+
     // open documents in new tabs
     if (extensionSettings.autoOpenActive !== false && !isProcessing) {
         const openInNewTabBtn = document.querySelector('[data-test-id="classFlow-theatreMode-openInNewTab-button"]');
@@ -112,21 +124,30 @@ function applyVisualFilter(query) {
         if (openInNewTabBtn || (iframe && iframe.src && iframe.src !== 'about:blank')) {
             isProcessing = true;
 
+            // Open in new tab
             if (openInNewTabBtn) {
-                // cick open in the new tab link button
                 openInNewTabBtn.click();
             } else if (iframe) {
-                // open iframe.src in new tab
                 window.open(iframe.src, '_blank');
             }
 
-            const closeBtn = document.querySelector('[data-test-id*="theatremode-close-button"]');
-            if (closeBtn) {
-                closeBtn.click();
-            }
+            // Close the viewer
+            setTimeout(() => {
+                const allButtons = document.querySelectorAll('.UIButton__button___c_Dxi');
+                const saveExitBtn = Array.from(allButtons).find(btn => 
+                    btn.textContent.includes('Save & Exit')
+                );
 
-            setTimeout(() => { 
-                isProcessing = false; 
+                if (saveExitBtn) {
+                    saveExitBtn.click();
+                } else {
+                    const closeBtn = document.querySelector('[data-test-id*="theatremode-close-button"]');
+                    if (closeBtn) closeBtn.click();
+                }
+
+                setTimeout(() => { 
+                    isProcessing = false; 
+                }, 1000);
             }, 500);
         }
     }
@@ -145,6 +166,100 @@ function applyVisualFilter(query) {
             }
         }
     }
+}
+
+function injectScrollButton() {
+    // check if the button already exists, if not skip.
+    if (document.getElementById('custom-scroll-to-bottom-btn')) return;
+    const statusBtn = document.querySelector('[data-test-id="classFlow-filterHeader-studentStatus-button"]');
+    if (!statusBtn) return; // if we aren't on the right page yet, just exit
+    
+    const statusWrapper = statusBtn.parentElement.parentElement;
+    const btnDiv = document.createElement('div');
+    const scrollBtn = document.createElement('button');
+    
+    scrollBtn.id = 'custom-scroll-to-bottom-btn'; 
+
+    // Pushes it next to the search bar and keeps it centered
+    btnDiv.style.marginRight = 'auto'; 
+    btnDiv.style.marginLeft = '16px'; 
+    btnDiv.style.display = 'flex';
+    btnDiv.style.alignItems = 'center';
+
+    scrollBtn.textContent = 'Scroll to Bottom'; 
+    scrollBtn.style.padding = '0 16px';
+    scrollBtn.style.height = '36px'; // Forces it to match search bar height
+    scrollBtn.style.minWidth = 'max-content'; // Prevents text from hiding
+    scrollBtn.style.flexShrink = '0'; // STOPS FLEXBOX FROM SQUISHING IT
+    scrollBtn.style.border = '1px solid #dcdcdc';
+    scrollBtn.style.borderRadius = '6px';
+    scrollBtn.style.background = '#fff';
+    scrollBtn.style.color = '#333';
+    scrollBtn.style.cursor = 'pointer';
+    scrollBtn.style.fontWeight = '500';
+    scrollBtn.style.whiteSpace = 'nowrap';
+    
+    // Hover effect
+    scrollBtn.style.transition = 'background 0.2s';
+    scrollBtn.onmouseover = () => scrollBtn.style.background = '#f5f5f5';
+    scrollBtn.onmouseout = () => scrollBtn.style.background = '#fff';
+
+    scrollBtn.onclick = () => {
+        const scrollBox = document.getElementById('classMaterials-innerContainer');
+        if (!scrollBox) {
+            alert("Couldn't find the scroll box! The ID might be wrong.");
+            return;
+        }
+
+        const duration = 800; 
+        const start = scrollBox.scrollTop;
+        const end = scrollBox.scrollHeight - scrollBox.clientHeight;
+        const change = end - start;
+        const startTime = performance.now();
+
+        // Variables for our interrupt system
+        let animationFrameId;
+        let isUserScrolling = false;
+
+        // The function that slams on the brakes if the user scrolls
+        const stopAnimation = () => {
+            isUserScrolling = true;
+            cancelAnimationFrame(animationFrameId);
+            // Clean up the listeners so they don't pile up
+            scrollBox.removeEventListener('wheel', stopAnimation);
+            scrollBox.removeEventListener('touchstart', stopAnimation);
+        };
+
+        // Attach the listeners to detect user scrolling (mouse wheel or trackpad/touch)
+        scrollBox.addEventListener('wheel', stopAnimation, { passive: true });
+        scrollBox.addEventListener('touchstart', stopAnimation, { passive: true });
+
+        function animateScroll(currentTime) {
+            if (isUserScrolling) return; // Abort instantly if user took over
+
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const easeProgress = 1 - Math.pow(1 - progress, 3); 
+            
+            scrollBox.scrollTop = start + (change * easeProgress);
+
+            if (elapsed < duration) {
+                animationFrameId = requestAnimationFrame(animateScroll);
+            } else {
+                // Animation finished naturally, clean up the listeners
+                scrollBox.removeEventListener('wheel', stopAnimation);
+                scrollBox.removeEventListener('touchstart', stopAnimation);
+            }
+        }
+        
+        animationFrameId = requestAnimationFrame(animateScroll);
+    };
+
+    btnDiv.appendChild(scrollBtn);
+
+    // 6. Insert before Status Wrapper
+    statusWrapper.parentNode.insertBefore(btnDiv, statusWrapper);
 }
 
 function applyCompactMode(isActive) {
