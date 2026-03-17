@@ -32,6 +32,4 @@ To update to a newer version:
 
 Click the extension icon in your browser toolbar to toggle specific features on or off. You must refresh your Toddle tab for changes to take effect.
 
----
-
 **Disclaimer:** This is not an official ESF or Toddle product. Use at your own risk.
