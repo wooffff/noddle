@@ -45,7 +45,7 @@
     <label for="toggleAutoOpen">Auto-open documents in new tabs</label>
   </div>
 
-  <div class="option-row" title="Search subjects by name (e.g. 'chem') instead of codes.">
+  <div class="option-row" title="Search subjects by name (e.g. &quot;chem&quot;) instead of codes.">
     <input type="checkbox" id="toggleAliases" checked>
     <label for="toggleAliases">Use subject names in search</label>
   </div>
@@ -70,12 +70,16 @@
       <label for="togglePriority">Prioritize Classes</label>
   </div>
 
-  <p>Please reload your page after making changes. Use this extension at your own risk.</p>
-
-  <div id="updateNotice" style="display: none; border-bottom: 1px solid black; padding-bottom: 8px; margin-bottom: 8px;">
-  <a href="https://github.com/wooffff/noddle" target="_blank">v<span id="remoteVersion"></span></a><span> now available. Click to download.</span>
+  <div class="option-row" title="Adds a button to let you open and close all folders at once, does not work for subfolders.">
+      <input type="checkbox" id="toggleFolderBtn">
+      <label for="toggleFolderBtn">Add "Toggle Folders" button</label>
   </div>
 
+  <p>Please reload your page after making changes. Use this extension at your own risk.</p>
+
+  <div id="updateNotice" style="display: none; padding-bottom: 8px; margin-bottom: 8px;">
+    <a href="https://github.com/wooffff/noddle" target="_blank">v<span id="remoteVersion"></span></a><span> now available. Click to download.</span>
+  </div>
 
   <script src="popup.js"></script>
 </body>

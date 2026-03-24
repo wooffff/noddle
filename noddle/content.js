@@ -15,15 +15,15 @@ const subjectAliases = {
     'spanish': ['SA'],
     'economics': ['EC'],
     'dt': ['TE'],
-    // buisness
+    'business': ['BS'],
+    'global politics': ['GP'],
     // ess
     // sports science
     // geography
     // visual art
     // theatre
     // music
-    // global politics
-    
+
     // Houses
     'nansen': ['N'],
     'wilberforce': ['W'],
@@ -45,8 +45,9 @@ chrome.storage.sync.get([
     'redirectActive', 
     'compactActive', 
     'prioritizeClassesActive',
-    'preloadActive'
-    
+    'preloadActive',
+    'scrollBtnActive',
+    'folderBtnActive'
 ], (settings) => {
     extensionSettings = settings;
 
@@ -84,7 +85,8 @@ function applyVisualFilter(query) {
 function cleanPage() {
     applyCompactMode(extensionSettings.compactActive);
     applyClassPrioritization(extensionSettings.prioritizeClassesActive);
-    injectScrollButton();
+    injectScrollButton(extensionSettings.scrollBtnActive);
+    injectFolderButton(extensionSettings.folderBtnActive);
 
     //redirect user from igcse to ib
     if (extensionSettings.redirectActive !== false) {
@@ -105,13 +107,11 @@ function cleanPage() {
     // remove no due date assignments tab
     if (extensionSettings.hideNoDueActive !== false) {
         const noDueTab = document.querySelector('[data-test-id="consolidatedDeadlinesWidget-tabs-tab-NODUE"]');
-        if (noDueTab) noDueTab.style.setProperty('display', 'none', 'important');
+        if (noDueTab) noDueTab.remove();
     }
 
-    // remove esf walk me button
+    // remove notif popup
     if (extensionSettings.hideNotifPopupActive !== false) {
-        // Note: The original code used walkMe.remove() here, which might cause an error if walkMe wasn't defined in this scope. 
-        // I fixed it to use notifPopup.remove()
         const notifPopup = document.querySelector('[id^="walkme-visual-design"]');
         if (notifPopup) notifPopup.remove(); 
     }
@@ -119,19 +119,18 @@ function cleanPage() {
     // open documents in new tabs
     if (extensionSettings.autoOpenActive !== false && !isProcessing) {
         const openInNewTabBtn = document.querySelector('[data-test-id="classFlow-theatreMode-openInNewTab-button"]');
-        const iframe = document.querySelector('iframe[src*="toddleapp.com/viewer"], iframe[src*="google.com"]');
-
+        const iframe = document.querySelector('iframe[src*="toddleapp.com/viewer"], iframe[src*="google.com"]:not([src*="docs.google.com/picker"])');
         if (openInNewTabBtn || (iframe && iframe.src && iframe.src !== 'about:blank')) {
             isProcessing = true;
 
-            // Open in new tab
+            // open in new tab
             if (openInNewTabBtn) {
                 openInNewTabBtn.click();
             } else if (iframe) {
                 window.open(iframe.src, '_blank');
             }
 
-            // Close the viewer
+            // close the viewer
             setTimeout(() => {
                 const allButtons = document.querySelectorAll('.UIButton__button___c_Dxi');
                 const saveExitBtn = Array.from(allButtons).find(btn => 
@@ -168,11 +167,18 @@ function cleanPage() {
     }
 }
 
-function injectScrollButton() {
-    // check if the button already exists, if not skip.
-    if (document.getElementById('custom-scroll-to-bottom-btn')) return;
+function injectScrollButton(isActive) {
+    const existingBtn = document.getElementById('custom-scroll-to-bottom-btn');
+    if (!isActive) {
+        if (existingBtn) {
+            existingBtn.parentElement.remove(); 
+        }
+        return; 
+    }
+    if (existingBtn) return;
+
     const statusBtn = document.querySelector('[data-test-id="classFlow-filterHeader-studentStatus-button"]');
-    if (!statusBtn) return; // if we aren't on the right page yet, just exit
+    if (!statusBtn) return; 
     
     const statusWrapper = statusBtn.parentElement.parentElement;
     const btnDiv = document.createElement('div');
@@ -180,7 +186,6 @@ function injectScrollButton() {
     
     scrollBtn.id = 'custom-scroll-to-bottom-btn'; 
 
-    // Pushes it next to the search bar and keeps it centered
     btnDiv.style.marginRight = 'auto'; 
     btnDiv.style.marginLeft = '16px'; 
     btnDiv.style.display = 'flex';
@@ -188,9 +193,9 @@ function injectScrollButton() {
 
     scrollBtn.textContent = 'Scroll to Bottom'; 
     scrollBtn.style.padding = '0 16px';
-    scrollBtn.style.height = '36px'; // Forces it to match search bar height
-    scrollBtn.style.minWidth = 'max-content'; // Prevents text from hiding
-    scrollBtn.style.flexShrink = '0'; // STOPS FLEXBOX FROM SQUISHING IT
+    scrollBtn.style.height = '36px'; 
+    scrollBtn.style.minWidth = 'max-content'; 
+    scrollBtn.style.flexShrink = '0'; 
     scrollBtn.style.border = '1px solid #dcdcdc';
     scrollBtn.style.borderRadius = '6px';
     scrollBtn.style.background = '#fff';
@@ -199,7 +204,6 @@ function injectScrollButton() {
     scrollBtn.style.fontWeight = '500';
     scrollBtn.style.whiteSpace = 'nowrap';
     
-    // Hover effect
     scrollBtn.style.transition = 'background 0.2s';
     scrollBtn.onmouseover = () => scrollBtn.style.background = '#f5f5f5';
     scrollBtn.onmouseout = () => scrollBtn.style.background = '#fff';
@@ -217,29 +221,24 @@ function injectScrollButton() {
         const change = end - start;
         const startTime = performance.now();
 
-        // Variables for our interrupt system
         let animationFrameId;
         let isUserScrolling = false;
 
-        // The function that slams on the brakes if the user scrolls
         const stopAnimation = () => {
             isUserScrolling = true;
             cancelAnimationFrame(animationFrameId);
-            // Clean up the listeners so they don't pile up
             scrollBox.removeEventListener('wheel', stopAnimation);
             scrollBox.removeEventListener('touchstart', stopAnimation);
         };
 
-        // Attach the listeners to detect user scrolling (mouse wheel or trackpad/touch)
         scrollBox.addEventListener('wheel', stopAnimation, { passive: true });
         scrollBox.addEventListener('touchstart', stopAnimation, { passive: true });
 
         function animateScroll(currentTime) {
-            if (isUserScrolling) return; // Abort instantly if user took over
+            if (isUserScrolling) return; 
 
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
             const easeProgress = 1 - Math.pow(1 - progress, 3); 
             
             scrollBox.scrollTop = start + (change * easeProgress);
@@ -247,7 +246,6 @@ function injectScrollButton() {
             if (elapsed < duration) {
                 animationFrameId = requestAnimationFrame(animateScroll);
             } else {
-                // Animation finished naturally, clean up the listeners
                 scrollBox.removeEventListener('wheel', stopAnimation);
                 scrollBox.removeEventListener('touchstart', stopAnimation);
             }
@@ -257,8 +255,6 @@ function injectScrollButton() {
     };
 
     btnDiv.appendChild(scrollBtn);
-
-    // 6. Insert before Status Wrapper
     statusWrapper.parentNode.insertBefore(btnDiv, statusWrapper);
 }
 
@@ -284,7 +280,6 @@ function applyCompactMode(isActive) {
     }
 }
 
-// move classes up to the top in the homepage
 function applyClassPrioritization(isActive) {
     let styleTag = document.getElementById('toddle-priority-styles');
     if (!isActive) { if (styleTag) styleTag.remove(); return; }
@@ -299,5 +294,79 @@ function applyClassPrioritization(isActive) {
             .GroupedProjectGroupList__container___AhHuD {order: 3 !important; }
         `;
         document.head.appendChild(styleTag);
+    }
+}
+
+function injectFolderButton(isActive) {
+    if (!isActive) {
+        const existingBtn = document.getElementById('custom-folder-toggle-btn');
+        if (existingBtn) existingBtn.remove();
+        return;
+    }
+
+    if (document.getElementById('custom-folder-toggle-btn')) return;
+
+    const statusBtn = document.querySelector('[data-test-id="classFlow-filterHeader-studentStatus-button"]');
+    if (!statusBtn) return; 
+    const statusWrapper = statusBtn.parentElement.parentElement;
+    
+    const folderBtn = document.createElement('button');
+    folderBtn.id = 'custom-folder-toggle-btn';
+    
+    folderBtn.style.padding = '0 10px';
+    folderBtn.style.height = '36px'; 
+    folderBtn.style.flexShrink = '0'; 
+    folderBtn.style.border = '1px solid #dcdcdc';
+    folderBtn.style.borderRadius = '6px';
+    folderBtn.style.background = '#fff';
+    folderBtn.style.color = '#333';
+    folderBtn.style.cursor = 'pointer';
+    folderBtn.style.display = 'flex';
+    folderBtn.style.alignItems = 'center';
+    folderBtn.style.justifyContent = 'center';
+    folderBtn.style.transition = 'background 0.2s';
+    folderBtn.onmouseover = () => folderBtn.style.background = '#f5f5f5';
+    folderBtn.onmouseout = () => folderBtn.style.background = '#fff';
+
+    const svgFolderOpen = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#3a3a3a"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z"/></svg>`;
+    const svgFolderClosed = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#3a3a3a"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640H447l-80-80H160v480l96-320h684L837-217q-8 26-29.5 41.5T760-160H160Zm84-80h516l72-240H316l-72 240Zm0 0 72-240-72 240Zm-84-400v-80 80Z"/></svg>`;
+
+    let isShowingOpenIcon = true;
+    folderBtn.innerHTML = svgFolderOpen;
+
+    folderBtn.onclick = async () => {
+        const targetAction = isShowingOpenIcon ? 'open' : 'close';
+        
+        isShowingOpenIcon = !isShowingOpenIcon;
+        folderBtn.innerHTML = isShowingOpenIcon ? svgFolderClosed : svgFolderOpen;
+
+        const allFolderButtons = document.querySelectorAll('[data-test-id*="-accordionToggle-button"]');
+        
+        for (let i = 0; i < allFolderButtons.length; i++) {
+            const btnId = allFolderButtons[i].getAttribute('data-test-id');
+            const freshBtn = document.querySelector(`[data-test-id="${btnId}"]`);
+            
+            if (freshBtn) {
+                const isClosed = freshBtn.className.includes('AccordionItem__toggleButtonCollapsed');
+                const isOpen = !isClosed;
+
+                if ((targetAction === 'open' && isClosed) || (targetAction === 'close' && isOpen)) {
+                    freshBtn.click();
+                    await new Promise(resolve => setTimeout(resolve, 0)); 
+                }
+            }
+        }
+    };
+
+    const allButtons = Array.from(document.querySelectorAll('button'));
+    const scrollBtnNode = allButtons.find(btn => btn.textContent.includes('Scroll'));
+
+    if (scrollBtnNode) {
+        scrollBtnNode.parentNode.insertBefore(folderBtn, scrollBtnNode.nextSibling);
+        folderBtn.style.marginLeft = '8px'; 
+        folderBtn.style.marginRight = '16px'; 
+    } else {
+        statusWrapper.parentNode.insertBefore(folderBtn, statusWrapper);
+        folderBtn.style.marginRight = '16px'; 
     }
 }

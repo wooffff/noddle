@@ -7,7 +7,8 @@ const aliasCheck = document.getElementById('toggleAliases');
 const redirectCheck = document.getElementById('toggleRedirect');
 const compactCheck = document.getElementById('toggleCompact');
 const priorityCheck = document.getElementById('togglePriority');
-const scrollBtnCheck = document.getElementById('toggleScrollBtn'); // <-- NEW SELECTOR
+const scrollBtnCheck = document.getElementById('toggleScrollBtn');
+const folderBtnCheck = document.getElementById('toggleFolderBtn');
 
 const updateNotice = document.getElementById('updateNotice');
 const remoteVersionSpan = document.getElementById('remoteVersion');
@@ -19,15 +20,15 @@ const defaultSettings = {
     autoOpenActive: true,
     aliasActive: true,
     redirectActive: true,
-    compactActive: false,
-    prioritizeClassesActive: false,
-    scrollBtnActive: true // <-- NEW SETTING (Default ON)
+    compactActive: true,
+    prioritizeClassesActive: true,
+    scrollBtnActive: true,
+    folderBtnActive: true
 };
 
 // by passing defaultSettings into .get(), Chrome will automatically use 
 // these fallbacks if the user's storage is empty on a fresh install.
 chrome.storage.sync.get(defaultSettings, (res) => {
-    
     hideWalkMe.checked = res.hideWalkMeActive;
     hideNoDueCheck.checked = res.hideNoDueActive;
     hideNotifPopup.checked = res.hideNotifPopupActive;
@@ -37,12 +38,13 @@ chrome.storage.sync.get(defaultSettings, (res) => {
     scrollBtnCheck.checked = res.scrollBtnActive;
     compactCheck.checked = res.compactActive;
     priorityCheck.checked = res.prioritizeClassesActive;
+    folderBtnCheck.checked = res.folderBtnActive;
 
     // save default settings immediately upon load.
     chrome.storage.sync.set(res);
 });
 
-// 4. Save Settings on change
+// save settings on change
 hideWalkMe.addEventListener('change', () => chrome.storage.sync.set({ hideWalkMeActive: hideWalkMe.checked }));
 hideNoDueCheck.addEventListener('change', () => chrome.storage.sync.set({ hideNoDueActive: hideNoDueCheck.checked }));
 hideNotifPopup.addEventListener('change', () => chrome.storage.sync.set({ hideNotifPopupActive: hideNotifPopup.checked }));
@@ -52,6 +54,7 @@ redirectCheck.addEventListener('change', () => chrome.storage.sync.set({ redirec
 scrollBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ scrollBtnActive: scrollBtnCheck.checked }));
 compactCheck.addEventListener('change', () => chrome.storage.sync.set({ compactActive: compactCheck.checked }));
 priorityCheck.addEventListener('change', () => chrome.storage.sync.set({ prioritizeClassesActive: priorityCheck.checked }));
+folderBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ folderBtnActive: folderBtnCheck.checked }));
 
 // checks for updates
 const REPO_URL = "https://raw.githubusercontent.com/wooffff/noddle/master/noddle/manifest.json";
