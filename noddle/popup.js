@@ -4,6 +4,7 @@ const hideNoDueCheck = document.getElementById('toggleHideNoDue');
 const hideNotifPopup = document.getElementById('toggleUnreadNotifications');
 const autoOpenCheck = document.getElementById('toggleAutoOpen');
 const aliasCheck = document.getElementById('toggleAliases');
+const backBtnCheck = document.getElementById('toggleBackButton');
 const redirectCheck = document.getElementById('toggleRedirect');
 const compactCheck = document.getElementById('toggleCompact');
 const priorityCheck = document.getElementById('togglePriority');
@@ -19,6 +20,7 @@ const defaultSettings = {
     hideNotifPopupActive: true,
     autoOpenActive: true,
     aliasActive: true,
+    backBtnActive: true,
     redirectActive: true,
     compactActive: true,
     prioritizeClassesActive: true,
@@ -34,6 +36,7 @@ chrome.storage.sync.get(defaultSettings, (res) => {
     hideNotifPopup.checked = res.hideNotifPopupActive;
     autoOpenCheck.checked = res.autoOpenActive;
     aliasCheck.checked = res.aliasActive;
+    backBtnCheck.checked = res.backBtnActive;
     redirectCheck.checked = res.redirectActive;
     scrollBtnCheck.checked = res.scrollBtnActive;
     compactCheck.checked = res.compactActive;
@@ -50,6 +53,7 @@ hideNoDueCheck.addEventListener('change', () => chrome.storage.sync.set({ hideNo
 hideNotifPopup.addEventListener('change', () => chrome.storage.sync.set({ hideNotifPopupActive: hideNotifPopup.checked }));
 autoOpenCheck.addEventListener('change', () => chrome.storage.sync.set({ autoOpenActive: autoOpenCheck.checked }));
 aliasCheck.addEventListener('change', () => chrome.storage.sync.set({ aliasActive: aliasCheck.checked }));
+backBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ backBtnActive: backBtnCheck.checked }));
 redirectCheck.addEventListener('change', () => chrome.storage.sync.set({ redirectActive: redirectCheck.checked }));
 scrollBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ scrollBtnActive: scrollBtnCheck.checked }));
 compactCheck.addEventListener('change', () => chrome.storage.sync.set({ compactActive: compactCheck.checked }));

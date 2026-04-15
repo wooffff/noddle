@@ -9,10 +9,10 @@ const subjectAliases = {
     'chinese': ['CY'],
     'french': ['FR'],
     'japanese': ['JA'],
+    'spanish': ['SA'],
     'history': ['HI'],
     'biology': ['BI'],
     'physics': ['PH'],
-    'spanish': ['SA'],
     'economics': ['EC'],
     'dt': ['TE'],
     'business': ['BS'],
@@ -42,6 +42,7 @@ chrome.storage.sync.get([
     'hideNotifPopupActive',
     'autoOpenActive', 
     'aliasActive', 
+    'backBtnActive',
     'redirectActive', 
     'compactActive', 
     'prioritizeClassesActive',
@@ -87,6 +88,7 @@ function cleanPage() {
     applyClassPrioritization(extensionSettings.prioritizeClassesActive);
     injectScrollButton(extensionSettings.scrollBtnActive);
     injectFolderButton(extensionSettings.folderBtnActive);
+    fixBackButton(extensionSettings.autoOpenActive);
 
     //redirect user from igcse to ib
     if (extensionSettings.redirectActive !== false) {
@@ -368,5 +370,34 @@ function injectFolderButton(isActive) {
     } else {
         statusWrapper.parentNode.insertBefore(folderBtn, statusWrapper);
         folderBtn.style.marginRight = '16px'; 
+    }
+}
+
+function fixBackButton(isActive) {
+    if (isActive === false) return;
+
+    const backButton = document.querySelector('button[aria-label="go back"]');
+    
+    if (backButton && !backButton.dataset.fixed) {
+        backButton.dataset.fixed = "true";
+
+        backButton.addEventListener('click', function(e) {
+            
+            // check if user came from toddle or url
+            if (!document.referrer.includes(window.location.host)) {
+                const currentUrl = window.location.href;
+            
+                // regex to find the course url
+                const courseMatch = currentUrl.match(/(.*\/courses\/\d+)/);
+                
+                if (courseMatch) {
+                    e.preventDefault();
+                    e.stopPropagation(); // stops Toddle's broken router from firing
+                    
+                    const fallbackUrl = courseMatch[1] + '/class-flow'; 
+                    window.location.href = fallbackUrl; 
+                }
+            }
+        }, true);
     }
 }
