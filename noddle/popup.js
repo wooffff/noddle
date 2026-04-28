@@ -66,7 +66,7 @@ const REPO_URL = "https://raw.githubusercontent.com/wooffff/noddle/master/noddle
 async function checkVersion() {
   try {
     const response = await fetch(REPO_URL);
-    if (!response.ok) return; // exit if 404
+    if (!response.ok) return;
     const data = await response.json();
     const remoteVersion = data.version;
     const localVersion = chrome.runtime.getManifest().version;
@@ -79,5 +79,7 @@ async function checkVersion() {
     console.log("Update check failed.");
   }
 }
+
+checkVersion();
 
 checkVersion();
