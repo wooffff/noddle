@@ -40,6 +40,7 @@ chrome.storage.sync.get([
     'hideWalkMeActive', 
     'hideNoDueActive', 
     'hideNotifPopupActive',
+    'hideSubmitNotif',
     'autoOpenActive', 
     'aliasActive', 
     'backBtnActive',
@@ -89,6 +90,7 @@ function cleanPage() {
     injectScrollButton(extensionSettings.scrollBtnActive);
     injectFolderButton(extensionSettings.folderBtnActive);
     fixBackButton(extensionSettings.autoOpenActive);
+    hideSubmitNotification(extensionSettings.hideSubmitNotif)
 
     //redirect user from igcse to ib
     if (extensionSettings.redirectActive !== false) {
@@ -399,5 +401,19 @@ function fixBackButton(isActive) {
                 }
             }
         }, true);
+    }
+}
+
+function hideSubmitNotification(isActive) {
+    if (isActive === true) {
+        const allButtons = document.querySelectorAll('button');
+        const leaveBtn = Array.from(allButtons).find(btn => 
+            btn.textContent.trim() === 'Leave without marking'
+        );
+
+        if (leaveBtn && !leaveBtn.dataset.autoClicked) {
+            leaveBtn.dataset.autoClicked = "true";
+            leaveBtn.click();
+        }
     }
 }

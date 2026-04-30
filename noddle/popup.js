@@ -2,6 +2,7 @@
 const hideWalkMe = document.getElementById('toggleWalkMe');
 const hideNoDueCheck = document.getElementById('toggleHideNoDue');
 const hideNotifPopup = document.getElementById('toggleUnreadNotifications');
+const submitNotifCheck = document.getElementById('toggleSubmitNotif');
 const autoOpenCheck = document.getElementById('toggleAutoOpen');
 const aliasCheck = document.getElementById('toggleAliases');
 const backBtnCheck = document.getElementById('toggleBackButton');
@@ -18,6 +19,7 @@ const defaultSettings = {
     hideWalkMeActive: true,
     hideNoDueActive: true,
     hideNotifPopupActive: true,
+    hideSubmitNotif: true,
     autoOpenActive: true,
     aliasActive: true,
     backBtnActive: true,
@@ -34,6 +36,7 @@ chrome.storage.sync.get(defaultSettings, (res) => {
     hideWalkMe.checked = res.hideWalkMeActive;
     hideNoDueCheck.checked = res.hideNoDueActive;
     hideNotifPopup.checked = res.hideNotifPopupActive;
+    submitNotifCheck.checked = res.hideSubmitNotif;
     autoOpenCheck.checked = res.autoOpenActive;
     aliasCheck.checked = res.aliasActive;
     backBtnCheck.checked = res.backBtnActive;
@@ -51,6 +54,7 @@ chrome.storage.sync.get(defaultSettings, (res) => {
 hideWalkMe.addEventListener('change', () => chrome.storage.sync.set({ hideWalkMeActive: hideWalkMe.checked }));
 hideNoDueCheck.addEventListener('change', () => chrome.storage.sync.set({ hideNoDueActive: hideNoDueCheck.checked }));
 hideNotifPopup.addEventListener('change', () => chrome.storage.sync.set({ hideNotifPopupActive: hideNotifPopup.checked }));
+submitNotifCheck.addEventListener('change', () => chrome.storage.sync.set({ hideSubmitNotif: submitNotifCheck.checked }));
 autoOpenCheck.addEventListener('change', () => chrome.storage.sync.set({ autoOpenActive: autoOpenCheck.checked }));
 aliasCheck.addEventListener('change', () => chrome.storage.sync.set({ aliasActive: aliasCheck.checked }));
 backBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ backBtnActive: backBtnCheck.checked }));
@@ -59,27 +63,3 @@ scrollBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ scroll
 compactCheck.addEventListener('change', () => chrome.storage.sync.set({ compactActive: compactCheck.checked }));
 priorityCheck.addEventListener('change', () => chrome.storage.sync.set({ prioritizeClassesActive: priorityCheck.checked }));
 folderBtnCheck.addEventListener('change', () => chrome.storage.sync.set({ folderBtnActive: folderBtnCheck.checked }));
-
-// checks for updates
-const REPO_URL = "https://raw.githubusercontent.com/wooffff/noddle/master/noddle/manifest.json";
-
-async function checkVersion() {
-  try {
-    const response = await fetch(REPO_URL);
-    if (!response.ok) return;
-    const data = await response.json();
-    const remoteVersion = data.version;
-    const localVersion = chrome.runtime.getManifest().version;
-
-    if (remoteVersion.localeCompare(localVersion, undefined, { numeric: true }) > 0) {
-      updateNotice.style.display = 'block';
-      remoteVersionSpan.textContent = remoteVersion;
-    }
-  } catch (e) {
-    console.log("Update check failed.");
-  }
-}
-
-checkVersion();
-
-checkVersion();
